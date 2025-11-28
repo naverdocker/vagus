@@ -4,11 +4,6 @@ __pycache__
 .venv
 
 session.vim
-*.txt
 
 .ideas
 tmp
-
-set_api_key
-set_gemini_key
-set_openai_key
