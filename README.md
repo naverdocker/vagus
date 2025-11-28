@@ -1,21 +1,65 @@
 # Vagus
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/naverdocker/vagus?sort=semver)](https://github.com/naverdocker/vagus/releases)
 
 > **The neural interface for your terminal.**
 
 Vagus is a CLI-based AI utility that connects your terminal workflows directly to Large Language Models.
 
+
 ## Features
 
-- **Gemini API Integration:** Built on `gemini-2.0-flash` for high-speed inference.
-- **Persistent Memory:** Automatically stores conversation history in a local JSONL file (`~/.vagus/memory.jsonl`).
-- **Context Injection:** Injects the last 5 conversation turns into every prompt to maintain continuity.
-- **Universal Input:** Supports standard piping (`echo "logs" | vagus`) or command-line arguments.
-- **Smart Retrieval:** Uses efficient `deque` loading to handle memory without parsing the entire history file.
-- **Secure Configuration:** Zero config files; relies on `GEMINI_API_KEY` environment variables for security.
+- **Multi-Model Support:** Uses litellm to route requests to Gemini, GPT-4, Claude or other local LLMs via the --model flag.
+
+- **Streaming Response:** Instant, token-by-token output directly to the terminal.
+
+- **Universal Input:** Seamlessly handles piped context and arguments simultaneously (cat logs | vagus "Fix this").
+
+- **Persistent Memory:** Local JSONL-based persistence in ~/.vagus/.
+
+- **Context Injection:** Automatically recalls the last 5 turns of conversation.
+
 
 ## Installation
 
 1. Clone the repository:
    ```bash
-   git clone [https://github.com/YOUR_USERNAME/vagus.git](https://github.com/YOUR_USERNAME/vagus.git)
+   git clone https://github.com/YOUR_USERNAME/vagus.git # Replace YOUR_USERNAME with your GitHub username
    cd vagus
+   ```
+
+2. Installation dependencies
+   ```bash
+   pip install litellm
+   ```
+
+3. Set your API key (depending on the model used):
+   ```bash
+   export GEMINI_API_KEY="your_api_key_here"
+   # OR
+   export OPENAI_API_KEY="your_api_key_here"
+   ```
+
+
+## Usage
+
+### Interactive Mode:Ask a quick question.
+   ```bash
+   python3 vagus.py "How do I reverse a list in Python?"
+   ```
+
+### Pipeline Mode: Pipe content from other tools directly into Vagus.
+   ```bash
+   # Debug a log file
+   cat /var/log/syslog | python3 vagus.py "Find the root cause of the error"
+   # Explain a script
+   cat deploy.sh | python3 vagus.py "Explain what this script does"
+   ```
+
+### Switch Models:Use different models supported by LiteLLM.
+   ```bash
+   python3 vagus.py -m "gpt-4o" "Refactor this code"
+   python3 vagus.py -m "anthropic/claude-3-opus" "Write a poem"
+   ```
+
+## Roadmap
+   See [ROADMAP.md](ROADMAP.md) for future plans and upcoming features.
