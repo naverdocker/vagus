@@ -3,14 +3,18 @@ import sys
 try:
     from litellm import completion
 except ImportError:
-    print("Error: 'litellm' module not found." file=sys.stderr)
+    print("Error: 'litellm' module not found.", file=sys.stderr)
     sys.exit(1)
 
 def query_model(model_name, messages, temperature=0.7):
-    full_text_response = ""
+    """
+    Streams the response from the llm.
+    Return the full aggregated response text after streaming.
+    """
+    full_response_text = ""
 
     try:
-        reponse = completion(
+        response = completion(
                 model=model_name,
                 messages=messages,
                 temperature=temperature,
@@ -27,4 +31,4 @@ def query_model(model_name, messages, temperature=0.7):
         return full_response_text
 
     except Exception as e:
-        raise Exception(f"Signal blocked - {srt(e)}")
+        raise Exception(f"Signal blocked - {str(e)}")

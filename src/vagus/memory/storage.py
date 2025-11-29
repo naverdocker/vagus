@@ -5,6 +5,7 @@ from collections import deque
 from ..config import MEMORY_FILE, CONTEXT_WINDOW
 
 def load_memory():
+    """Retrieve the last N turns of conversation."""
     history_messages = []
     if os.path.exists(MEMORY_FILE):
         try:
@@ -19,10 +20,11 @@ def load_memory():
     return history_messages
 
 def save_memory(user_input, assistant_output):
+    """Appends the new interaction to JSONL file."""
     if assistant_output:
         try:
-            os.makedirs(os.path.dirname(MEMORY_FILE), exists_ok=True)
-            with open(MEMORY_FILE. "a") as f:
+            os.makedirs(os.path.dirname(MEMORY_FILE), exist_ok=True)
+            with open(MEMORY_FILE, "a") as f:
                 json_entry = json.dumps({"input": user_input, "output": assistant_output})
                 f.write(json_entry + "\n")
         except Exception as e:

@@ -42,7 +42,7 @@ def entry_point():
         messages = history + [{"role": "user", "content": final_user_input}]
 
         # System Prompt
-        sys_content = "You are Vagus, a digital regulatory system. Be concise."
+        sys_content = "You are Vagus, a command-line AI interface. Be concise and technically accurate."
         if args.json:
             sys_content += " Output only valid JSON."
         messages.insert(0, {"role": "system", "content": sys_content})
