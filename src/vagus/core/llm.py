@@ -1,12 +1,9 @@
 import sys
+from litellm import completion
 
-try:
-    from litellm import completion
-except ImportError:
-    print("Error: 'litellm' module not found.", file=sys.stderr)
-    sys.exit(1)
+from ..utils.cost import print_cost
 
-def query_model(model_name, messages, temperature=0.7):
+def query_model(model_name, messages, temperature=0.7, stream_output=True):
     """
     Streams the response from the llm.
     Return the full aggregated response text after streaming.
@@ -24,10 +21,15 @@ def query_model(model_name, messages, temperature=0.7):
         for chunk in response:
             if chunk.choices and chunk.choices[0].delta.content:
                 delta = chunk.choices[0].delta.content
-                print(delta, end="", flush=True)
+                if stream_output:
+                    print(delta, end="", flush=True)
                 full_response_text += delta
 
-        print()
+        if stream_output:
+            print()
+
+        print_cost(model_name, messages, full_response_text)
+
         return full_response_text
 
     except Exception as e:

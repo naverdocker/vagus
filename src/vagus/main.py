@@ -31,6 +31,7 @@ def entry_point():
     parser.add_argument("-m", "--model", type=str, default=DEFAULT_MODEL, help="Model name")
     parser.add_argument("-t", "--temp", type=str, default=DEFAULT_TEMP, help="Temperature")
     parser.add_argument("--json", action="store_true", help="Force JSON output")
+    parser.add_argument("--no-stream", action="store_true", help="Disable Streaming (print at end)")
     args = parser.parse_args()
 
 
@@ -49,8 +50,11 @@ def entry_point():
 
 
         # --- CALL LLM ---
-        response_text = query_model(args.model, messages, args.temp)
+        stream_enabled = not args.no_stream
+        response_text = query_model(args.model, messages, args.temp, stream_output=stream_enabled)
 
+        if args.no_stream:
+            print(response_text)
 
         # --- PERSIST MEMORY ---
         save_memory(final_user_input, response_text)
