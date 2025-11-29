@@ -1,9 +1,12 @@
 .vagus
 
-__pycache__
 .venv
+__pycache__
+*.egg-info/
 
 session.vim
 
-.ideas
-tmp
+.idea
+tmp/
+
+.gitignore.local
