@@ -12,6 +12,8 @@ Vagus is a CLI-based AI utility that connects your terminal workflows directly t
 
 - **Streaming Response:** Instant, token-by-token output directly to the terminal.
 
+- **Cost Observability:** Real-time token usage and cost tracking printed to stderr (dimmed) for budget awareness.
+
 - **Universal Input:** Seamlessly handles piped context and arguments simultaneously (cat logs | vagus "Fix this").
 
 - **Persistent Memory:** Local JSONL-based persistence in ~/.vagus/.
@@ -63,6 +65,12 @@ Pipe content from other tools directly into Vagus.
    cat /var/log/syslog | vagus "Find the root cause of the error"
    # Explain a script
    cat deploy.sh | vagus "Explain what this script does"
+   ```
+
+### File Output (No Streaming)
+To save output to a file without the typing effect (which can corrupt pipes):
+   ```bash
+   vagus "Generate a config file" --no-stream > config.json
    ```
 
 ### Switch Models:

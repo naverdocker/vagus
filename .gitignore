@@ -3,10 +3,12 @@
 .venv
 __pycache__
 *.egg-info/
+src/*.egg-info/
 
 session.vim
 
 .idea
 tmp/
 
-.gitignore.local
+build/
+dist/
