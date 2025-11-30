@@ -10,27 +10,23 @@ def query_model(model_name, messages, temperature=0.7, stream_output=True):
     """
     full_response_text = ""
 
-    try:
-        response = completion(
-                model=model_name,
-                messages=messages,
-                temperature=temperature,
-                stream=True
-        )
+    response = completion(
+            model=model_name,
+            messages=messages,
+            temperature=temperature,
+            stream=True
+    )
 
-        for chunk in response:
-            if chunk.choices and chunk.choices[0].delta.content:
-                delta = chunk.choices[0].delta.content
-                if stream_output:
-                    print(delta, end="", flush=True)
-                full_response_text += delta
+    for chunk in response:
+        if chunk.choices and chunk.choices[0].delta.content:
+            delta = chunk.choices[0].delta.content
+            if stream_output:
+                print(delta, end="", flush=True)
+            full_response_text += delta
 
-        if stream_output:
-            print()
+    if stream_output:
+        print()
 
-        print_cost(model_name, messages, full_response_text)
+    print_cost(model_name, messages, full_response_text)
 
-        return full_response_text
-
-    except Exception as e:
-        raise Exception(f"Signal blocked - {str(e)}")
+    return full_response_text

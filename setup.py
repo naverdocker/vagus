@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
         name="vagus",
-        version="0.1.2",
+        version="0.1.3",
         description="The Neural Interface for your Terminal",
         author="naverdocker",
         package_dir={"": "src"},

@@ -6,6 +6,7 @@ This document tracks planned engineering efforts and conceptual ideas for the fu
 - [x] **v0.1.0:** Initial Release with Streaming & Memory.
 - [x] **v0.1.1:** Architectural Refactor (Modular package structure, `pip install` support).
 - [x] **v0.1.2:** Cost Observability & File Redirection Support (`--no-stream`).
+- [x] **v0.1.3:** Hardening & Robustness (Structured Memory Storage, Session Management, improved error handling).
 
 ## Planned Engineering (Short-Term)
 - [ ] **Vector Embeddings (RAG):** Implement semantic search over long-term history (moving beyond the 5-turn limit).
