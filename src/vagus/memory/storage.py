@@ -2,31 +2,41 @@ import os
 import sys
 import json
 from collections import deque
-from ..config import MEMORY_FILE, CONTEXT_WINDOW
+from ..config import DEFAULT_MEMORY_FILE, SESSIONS_DIR, INTERACTION_WINDOW
 
-def load_memory():
-    """Retrieve the last N turns of conversation."""
-    history_messages = []
-    if os.path.exists(MEMORY_FILE):
+def _get_memory_path(session=None):
+    if session:
+        os.makedirs(SESSIONS_DIR, exist_ok=True)
+        return os.path.join(SESSIONS_DIR, f"{session}.jsonl")
+    return DEFAULT_MEMORY_FILE
+
+def load_memory(session=None):
+    path = _get_memory_path(session)
+    history = []
+    if os.path.exists(path):
         try:
-            with open(MEMORY_FILE, "r") as f:
-                for line in deque(f, maxlen=CONTEXT_WINDOW):
+            with open(path, "r") as f:
+                for line in deque(f, maxlen=INTERACTION_WINDOW):
                     if line.strip():
-                        entry = json.loads(line)
-                        history_messages.append({"role": "user", "content": entry["input"]})
-                        history_messages.append({"role": "assistant", "content": entry["output"]})
+                        try:
+                            entry = json.loads(line)
+                            history.append({"role": "user", "content": entry["input"]})
+                            history.append({"role": "assistant", "content": entry["output"]})
+                        except json.JSONDecodeError:
+                            print(f"Warning: Corrupted line in memory file '{path}', skipping.", file=sys.stderr)
         except Exception as e:
-            print(f"Warning: Memory read error - {e}", file=sys.stderr)
-    return history_messages
+            print(f"Warning: Memory read error for '{path}' - {e}", file=sys.stderr)
+    return history
 
-def save_memory(user_input, assistant_output):
-    """Appends the new interaction to JSONL file."""
+def save_memory(user_input, assistant_output, session=None):
     if assistant_output:
+        path = _get_memory_path(session)
         try:
-            os.makedirs(os.path.dirname(MEMORY_FILE), exist_ok=True)
-            with open(MEMORY_FILE, "a") as f:
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, "a") as f:
+                os.fchmod(f.fileno(), 0o600)
                 json_entry = json.dumps({"input": user_input, "output": assistant_output})
                 f.write(json_entry + "\n")
         except Exception as e:
-            print(f"Warning: Memory storage failed - {e}", file=sys.stderr)
+            print(f"Warning: Memory save error for '{path}' - {e}", file=sys.stderr)
 
