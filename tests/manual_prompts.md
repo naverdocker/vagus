@@ -78,3 +78,25 @@ vagus "Invent a new word and define it" -t 1.5
 vagus "Hello"
 ```
 *Observation:* Look for `[Cost: $0.00...]` in gray at the end of the output.
+
+## 10. Session Management (`--session`)
+*Goal: Verify that contexts are isolated.*
+
+**Step 1: Create 'Coding' session**
+```bash
+vagus --session coding "My favorite language is Python."
+```
+
+**Step 2: Create 'Cooking' session**
+```bash
+vagus --session cooking "My favorite food is Pizza."
+```
+
+**Step 3: Verify Isolation**
+```bash
+vagus --session coding "What is my favorite language?"
+# Expect: Python
+
+vagus --session cooking "What is my favorite language?"
+# Expect: I don't know (or hallucination, but NOT Python from the other session)
+```
