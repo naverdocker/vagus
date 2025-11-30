@@ -80,5 +80,12 @@ Use different models supported by LiteLLM.
    vagus -m "anthropic/claude-3-opus" "Write a poem"
    ```
 
+### Use Sessions:
+Maintain separate conversation histories for different topics.
+   ```bash
+   vagus --session "coding-help" "Explain this Python code..."
+   vagus --session "blog-draft" "Write a catchy intro for my blog post."
+   ```
+
 ## Roadmap
    See [ROADMAP.md](ROADMAP.md) for future plans and upcoming features.
