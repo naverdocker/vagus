@@ -6,7 +6,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setup(
     name="vagus",
-    version="0.1.3",
+    version="0.2.0",
     description="The Neural Interface for your Terminal",
     long_description=long_description,
     long_description_content_type="text/markdown",

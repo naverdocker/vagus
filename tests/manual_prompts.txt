@@ -1,0 +1,18 @@
+vagus "What is the capital of France?" # Basic Connectivity & Response
+vagus --session memory_test "My name is Alice." # Context & Memory: Step 1 (Set context)
+vagus --session memory_test "What is my name?" # Context & Memory: Step 2 (Recall context)
+echo "The quick brown fox jumps over the lazy dog" | vagus "Translate this text to Spanish" # System Pipes (Stdin Input)
+vagus "List 3 fruits and their colors" --json # JSON Mode (--json)
+vagus "Count from 1 to 10 slowly" # Streaming (Default)
+vagus "Count from 1 to 10 slowly" --no-stream # No-Streaming
+vagus "Generate a CSV file with 5 rows of dummy user data (id, name, email)." --no-stream > test_data.csv # File Redirection (Check test_data.csv for content)
+vagus "Write a Python function to calculate the Fibonacci sequence recursively." # Code Generation
+vagus "Pick a random number between 1 and 100" -t 0.0 # Temperature Control (Deterministic)
+vagus "Invent a new word and define it" -t 1.5 # Temperature Control (Creative)
+vagus "Hello" # Cost Display
+vagus --session coding "My favorite language is Python." # Session Management: Step 1 (Create 'Coding' session)
+vagus --session cooking "My favorite food is Pizza." # Session Management: Step 2 (Create 'Cooking' session)
+vagus --session coding "What is my favorite language?" # Session Management: Step 3 (Verify Isolation - Expect: Python)
+vagus --session cooking "What is my favorite language?" # Session Management: Step 3 (Verify Isolation - Expect: I don't know)
+vagus --rag data/secret_project.pdf "What is the secret code of Project Omega?" # RAG: Query secret project PDF
+vagus --rag data/secret_project.pdf "Who is the lead engineer for SunToast?" # RAG: Query another detail

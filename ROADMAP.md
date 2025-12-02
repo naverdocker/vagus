@@ -7,10 +7,13 @@ This document tracks planned engineering efforts and conceptual ideas for the fu
 - [x] **v0.1.1:** Architectural Refactor (Modular package structure, `pip install` support).
 - [x] **v0.1.2:** Cost Observability & File Redirection Support (`--no-stream`).
 - [x] **v0.1.3:** Hardening & Robustness (Structured Memory Storage, Session Management, improved error handling).
+- [x] **v0.2.0:** RAG Implementation (PDF Chat, Vector Store, Optional Dependencies).
 
 ## Planned Engineering (Short-Term)
-- [ ] **Vector Embeddings (RAG):** Implement semantic search over long-term history (moving beyond the 5-turn limit).
-
+- [ ] **Remote Embeddings:** Support OpenAI/Gemini embedding APIs to reduce local dependency weight.
+- [ ] **CI/CD Pipeline:** Add GitHub Actions for automated linting, testing, and release builds.
+- [ ] **Unit Test Suite:** Replace manual tests with a robust `pytest` suite.
+- [ ] **Vector Search over History:** Extend RAG to index long-term conversation history (moving beyond the 5-turn limit).
 
 ## Concepts & Exploration (Long-Term Ideas)
 _These are experimental ideas that may or may not be implemented._

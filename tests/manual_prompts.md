@@ -100,3 +100,21 @@ vagus --session coding "What is my favorite language?"
 vagus --session cooking "What is my favorite language?"
 # Expect: I don't know (or hallucination, but NOT Python from the other session)
 ```
+
+## 11. RAG (Chat with Docs)
+*Goal: Verify the AI can answer questions based on a provided PDF.*
+
+**Prerequisite:**
+Ensure you have installed the RAG dependencies:
+```bash
+pip install -e .[rag]
+```
+
+**Test:**
+1. Create a dummy PDF (or use an existing one).
+2. Run Vagus pointing to it:
+```bash
+vagus --rag my_document.pdf "Summarize this document"
+```
+*Observation:* The output should reflect the specific content of the PDF, not general knowledge.
+*Check:* Verify the terminal shows `[RAG] Ingesting...` logs.
