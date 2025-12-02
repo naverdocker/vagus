@@ -15,13 +15,13 @@ setup(
     package_dir={"": "src"},
     packages=find_packages(where="src"),
         install_requires=[
-            "litellm",
+            "litellm~=1.80",
         ],
         extras_require={
             "rag": [
-                "chromadb",
-                "pypdf",
-                "sentence-transformers"
+                "chromadb~=1.3",
+                "pypdf~=6.0",
+                "sentence-transformers~=5.1"
             ]
         },
     classifiers=[
