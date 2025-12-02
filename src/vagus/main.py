@@ -1,4 +1,5 @@
 import sys
+import hashlib
 import argparse
 from litellm.exceptions import AuthenticationError, RateLimitError, APIConnectionError, NotFoundError
 from .config import DEFAULT_MODEL, DEFAULT_TEMP
@@ -23,8 +24,18 @@ def get_user_input(args):
 
     return "\n".join(parts)
 
+def get_file_hash(file_path):
+    """Computes MD5 hash of the file content."""
+    hasher = hashlib.md5()
+    with open(file_path, 'rb') as f:
+        buf = f.read(65536)
+        while len(buf) > 0:
+            hasher.update(buf)
+            buf = f.read(65536)
+    return hasher.hexdigest()
+
 def setup_rag_context(file_path, query_text):
-    """Initializes vector store, ingests doc, and retrieves context."""
+    """Initializes vector store, checks cache, ingests if needed, and retrieves context."""
     if not file_path:
         return ""
 
@@ -32,19 +43,27 @@ def setup_rag_context(file_path, query_text):
         from .memory.vector_store import VectorStore
         from .utils.pdf_ingestor import extract_text_from_pdf, chunk_text
         
-        # Fresh start: use dedicated collection and reset it
-        store = VectorStore(collection_name="vagus_cli_context")
-        try:
-            store.client.delete_collection("vagus_cli_context")
-            store = VectorStore(collection_name="vagus_cli_context")
-        except:
-            pass
+        # Use a persistent collection for file caching
+        store = VectorStore(collection_name="vagus_file_cache")
+        
+        # 1. Compute Hash
+        file_hash = get_file_hash(file_path)
+        
+        # 2. Check Cache
+        # We query for just 1 ID with this hash to see if it exists
+        existing = store.collection.get(where={"file_hash": file_hash}, limit=1)
+        
+        if not existing['ids']:
+            print(f"[RAG] Ingesting new file: {file_path}...", file=sys.stderr)
+            raw_text = extract_text_from_pdf(file_path)
+            chunks = chunk_text(raw_text)
+            # Tag chunks with the hash so we can find them later
+            store.add_documents(chunks, metadatas=[{"file_hash": file_hash}] * len(chunks))
+        else:
+            print(f"[RAG] Using cached embeddings for {file_path}", file=sys.stderr)
 
-        print(f"[RAG] Ingesting {file_path}...", file=sys.stderr)
-        raw_text = extract_text_from_pdf(file_path)
-        store.add_documents(chunk_text(raw_text))
-
-        results = store.query([query_text], n_results=3)
+        # 3. Retrieve (Filtered by Hash)
+        results = store.query([query_text], n_results=3, where={"file_hash": file_hash})
         
         if results and results['documents'] and results['documents'][0]:
             return "\n\n[Relevant Documents (RAG)]:\n" + "\n".join(results['documents'][0])

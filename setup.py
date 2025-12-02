@@ -6,7 +6,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setup(
     name="vagus",
-    version="0.2.0",
+    version="0.2.1",
     description="The Neural Interface for your Terminal",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -15,13 +15,13 @@ setup(
     package_dir={"": "src"},
     packages=find_packages(where="src"),
         install_requires=[
-            "litellm",
+            "litellm~=1.80",
         ],
         extras_require={
             "rag": [
-                "chromadb",
-                "pypdf",
-                "sentence-transformers"
+                "chromadb~=1.3",
+                "pypdf~=6.0",
+                "sentence-transformers~=5.1"
             ]
         },
     classifiers=[
