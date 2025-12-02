@@ -14,9 +14,16 @@ setup(
     url="https://github.com/naverdocker/vagus",
     package_dir={"": "src"},
     packages=find_packages(where="src"),
-    install_requires=[
-        "litellm",
-    ],
+        install_requires=[
+            "litellm",
+        ],
+        extras_require={
+            "rag": [
+                "chromadb",
+                "pypdf",
+                "sentence-transformers"
+            ]
+        },
     classifiers=[
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",

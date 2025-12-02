@@ -9,3 +9,7 @@ DEFAULT_TEMP = 0.7
 
 # Number of interactions (user + AI turns) to keep in memory.
 INTERACTION_WINDOW = 5
+
+# RAG Configuration
+VECTOR_DB_PATH = os.path.join(VAGUS_DIR, "vector_db")
+DEFAULT_EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"

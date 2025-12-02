@@ -23,58 +23,91 @@ def get_user_input(args):
 
     return "\n".join(parts)
 
+def setup_rag_context(file_path, query_text):
+    """Initializes vector store, ingests doc, and retrieves context."""
+    if not file_path:
+        return ""
+
+    try:
+        from .memory.vector_store import VectorStore
+        from .utils.pdf_ingestor import extract_text_from_pdf, chunk_text
+        
+        # Fresh start: use dedicated collection and reset it
+        store = VectorStore(collection_name="vagus_cli_context")
+        try:
+            store.client.delete_collection("vagus_cli_context")
+            store = VectorStore(collection_name="vagus_cli_context")
+        except:
+            pass
+
+        print(f"[RAG] Ingesting {file_path}...", file=sys.stderr)
+        raw_text = extract_text_from_pdf(file_path)
+        store.add_documents(chunk_text(raw_text))
+
+        results = store.query([query_text], n_results=3)
+        
+        if results and results['documents'] and results['documents'][0]:
+            return "\n\n[Relevant Documents (RAG)]:\n" + "\n".join(results['documents'][0])
+            
+    except ImportError:
+        print("\nError: RAG deps missing. Run 'pip install vagus[rag]'\n", file=sys.stderr)
+        sys.exit(1)
+    except Exception as e:
+        print(f"\nRAG Error: {e}", file=sys.stderr)
+        sys.exit(1)
+    
+    return ""
 
 def entry_point():
     """The main execution flow."""
-    # --- ARGUMENT PARSING ---
     parser = argparse.ArgumentParser(description="vagus: The Neural Interface")
     parser.add_argument("prompt", nargs="*", help="The user prompt")
     parser.add_argument("-m", "--model", type=str, default=DEFAULT_MODEL, help="Model name")
     parser.add_argument("-t", "--temp", type=float, default=DEFAULT_TEMP, help="Temperature")
-    parser.add_argument("-s", "--session", type=str, help="Session name (for isolated memory)")
+    parser.add_argument("-s", "--session", type=str, help="Session name")
+    parser.add_argument("--rag", type=str, help="Path to PDF file for context")
     parser.add_argument("--json", action="store_true", help="Force JSON output")
-    parser.add_argument("--no-stream", action="store_true", help="Disable Streaming (print at end)")
+    parser.add_argument("--no-stream", action="store_true", help="Disable Streaming")
     args = parser.parse_args()
 
-
     try:
-        # --- PREPARE CONTEXT ---
         final_user_input = get_user_input(args)
+        rag_context = setup_rag_context(args.rag, final_user_input)
         history = load_memory(session=args.session)
 
         messages = history + [{"role": "user", "content": final_user_input}]
 
-        # System Prompt
         sys_content = "You are Vagus, a command-line AI interface. Be concise and technically accurate."
         if args.json:
             sys_content += " Output only valid JSON."
+        
+        if rag_context:
+            sys_content += f"\n\nUse the following retrieved context to answer the user:\n{rag_context}"
+
         messages.insert(0, {"role": "system", "content": sys_content})
 
-
-        # --- CALL LLM ---
         stream_enabled = not args.no_stream
         response_text = query_model(args.model, messages, args.temp, stream_output=stream_enabled)
 
         if args.no_stream:
             print(response_text)
 
-        # --- PERSIST MEMORY ---
         save_memory(final_user_input, response_text, session=args.session)
 
     except KeyboardInterrupt:
         print("\n\n[Signal Lost]", file=sys.stderr)
         sys.exit(0)
     except AuthenticationError:
-        print(f"\nError: Authentication Failed. Check your API Key for model '{args.model}'.", file=sys.stderr)
+        print(f"\nError: Authentication Failed for model '{args.model}'.", file=sys.stderr)
         sys.exit(1)
     except RateLimitError:
-        print(f"\nError: Rate Limit Exceeded. Slow down or check your quota.", file=sys.stderr)
+        print(f"\nError: Rate Limit Exceeded.", file=sys.stderr)
         sys.exit(1)
     except NotFoundError:
-        print(f"\nError: Model '{args.model}' not found. Check the model name.", file=sys.stderr)
+        print(f"\nError: Model '{args.model}' not found.", file=sys.stderr)
         sys.exit(1)
     except APIConnectionError:
-        print(f"\nError: Connection Failed. Check your internet connection.", file=sys.stderr)
+        print(f"\nError: Connection Failed.", file=sys.stderr)
         sys.exit(1)
     except Exception as e:
         print(f"\nError: {e}", file=sys.stderr)
