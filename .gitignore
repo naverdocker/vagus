@@ -1,14 +1,26 @@
-.vagus
-
-.venv
-__pycache__
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
 *.egg-info/
-src/*.egg-info/
-
-session.vim
-
-.idea
-tmp/
-
+.eggs/
 build/
 dist/
+.venv
+venv/
+ENV/
+
+# --- Environment Variables & Secrets ---
+.env
+.env.local
+
+# --- IDEs & Editors ---
+.idea/
+*.swp
+*.swo
+session.vim
+
+# --- Project Specific ---
+.vagus/
+tmp/
+data/
