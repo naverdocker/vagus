@@ -10,8 +10,7 @@ This document tracks planned engineering efforts and conceptual ideas for the fu
 
 ## Planned Engineering (Short-Term)
 - [ ] **Vector Embeddings (RAG):** Implement semantic search over long-term history (moving beyond the 5-turn limit).
-- [ ] **Structured Memory Storage:** Move memory to `~/.vagus/sessions/` to support named threads.
-- [ ] **Session Management:** Add a `--session` flag to maintain distinct conversation contexts.
+
 
 ## Concepts & Exploration (Long-Term Ideas)
 _These are experimental ideas that may or may not be implemented._

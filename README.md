@@ -16,7 +16,7 @@ Vagus is a CLI-based AI utility that connects your terminal workflows directly t
 
 - **Universal Input:** Seamlessly handles piped context and arguments simultaneously (cat logs | vagus "Fix this").
 
-- **Persistent Memory:** Local JSONL-based persistence in ~/.vagus/.
+- **Persistent Memory:** Local JSONL-based persistence in `~/.vagus/` (or `~/.vagus/sessions/` for named sessions).
 
 - **Context Injection:** Automatically recalls the last 5 turns of conversation.
 
@@ -89,3 +89,6 @@ Maintain separate conversation histories for different topics.
 
 ## Roadmap
    See [ROADMAP.md](ROADMAP.md) for future plans and upcoming features.
+
+## License
+   This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
