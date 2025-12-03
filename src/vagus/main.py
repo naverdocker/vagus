@@ -1,10 +1,20 @@
 import sys
 import hashlib
 import argparse
+import os
+import logging
+
+import litellm
 from litellm.exceptions import AuthenticationError, RateLimitError, APIConnectionError, NotFoundError
+
 from .config import DEFAULT_MODEL, DEFAULT_TEMP
 from .memory.storage import load_memory, save_memory
 from .core.llm import query_model
+
+os.environ["LITELLM_LOG"] = "CRITICAL"
+litellm.suppress_debug_info = True
+logging.getLogger("LiteLLM").setLevel(logging.CRITICAL)
+logging.getLogger("litellm").setLevel(logging.CRITICAL)
 
 def get_user_input(args):
     """Combines command line arguments and piped stdin into a single prompt."""
@@ -42,17 +52,17 @@ def setup_rag_context(file_path, query_text):
     try:
         from .memory.vector_store import VectorStore
         from .utils.pdf_ingestor import extract_text_from_pdf, chunk_text
-        
+
         # Use a persistent collection for file caching
         store = VectorStore(collection_name="vagus_file_cache")
-        
+
         # 1. Compute Hash
         file_hash = get_file_hash(file_path)
-        
+
         # 2. Check Cache
         # We query for just 1 ID with this hash to see if it exists
         existing = store.collection.get(where={"file_hash": file_hash}, limit=1)
-        
+
         if not existing['ids']:
             print(f"[RAG] Ingesting new file: {file_path}...", file=sys.stderr)
             raw_text = extract_text_from_pdf(file_path)
@@ -64,17 +74,17 @@ def setup_rag_context(file_path, query_text):
 
         # 3. Retrieve (Filtered by Hash)
         results = store.query([query_text], n_results=3, where={"file_hash": file_hash})
-        
+
         if results and results['documents'] and results['documents'][0]:
             return "\n\n[Relevant Documents (RAG)]:\n" + "\n".join(results['documents'][0])
-            
+
     except ImportError:
         print("\nError: RAG deps missing. Run 'pip install vagus[rag]'\n", file=sys.stderr)
         sys.exit(1)
     except Exception as e:
         print(f"\nRAG Error: {e}", file=sys.stderr)
         sys.exit(1)
-    
+
     return ""
 
 def entry_point():
@@ -99,7 +109,7 @@ def entry_point():
         sys_content = "You are Vagus, a command-line AI interface. Be concise and technically accurate."
         if args.json:
             sys_content += " Output only valid JSON."
-        
+
         if rag_context:
             sys_content += f"\n\nUse the following retrieved context to answer the user:\n{rag_context}"
 
