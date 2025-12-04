@@ -4,15 +4,15 @@ import json
 from collections import deque
 from ..config import DEFAULT_MEMORY_FILE, SESSIONS_DIR, INTERACTION_WINDOW
 
-def _get_memory_path(session=None):
+def _get_memory_path(session: str | None = None) -> str:
     if session:
         os.makedirs(SESSIONS_DIR, exist_ok=True)
         return os.path.join(SESSIONS_DIR, f"{session}.jsonl")
     return DEFAULT_MEMORY_FILE
 
-def load_memory(session=None):
+def load_memory(session: str | None = None) -> list[dict]:
     path = _get_memory_path(session)
-    history = []
+    history: list[dict] = []
     if os.path.exists(path):
         try:
             with open(path, "r") as f:
@@ -28,7 +28,7 @@ def load_memory(session=None):
             print(f"Warning: Memory read error for '{path}' - {e}", file=sys.stderr)
     return history
 
-def save_memory(user_input, assistant_output, session=None):
+def save_memory(user_input: str, assistant_output: str, session: str | None = None) -> None:
     if assistant_output:
         path = _get_memory_path(session)
         try:

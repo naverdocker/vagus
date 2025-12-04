@@ -3,7 +3,7 @@ from litellm import completion
 
 from ..utils.cost import print_cost
 
-def query_model(model_name, messages, temperature=0.7, stream_output=True):
+def query_model(model_name: str, messages: list[dict], temperature: float = 0.7, stream_output: bool = True) -> str:
     """
     Streams the response from the llm.
     Return the full aggregated response text after streaming.

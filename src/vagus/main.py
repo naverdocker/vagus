@@ -1,3 +1,4 @@
+import traceback # Added for debug flag
 import sys
 import hashlib
 import argparse
@@ -44,7 +45,7 @@ def get_file_hash(file_path):
             buf = f.read(65536)
     return hasher.hexdigest()
 
-def setup_rag_context(file_path, query_text):
+def setup_rag_context(file_path, query_text, debug_enabled):
     """Initializes vector store, checks cache, ingests if needed, and retrieves context."""
     if not file_path:
         return ""
@@ -53,21 +54,18 @@ def setup_rag_context(file_path, query_text):
         from .memory.vector_store import VectorStore
         from .utils.pdf_ingestor import extract_text_from_pdf, chunk_text
 
-        # Use a persistent collection for file caching
         store = VectorStore(collection_name="vagus_file_cache")
 
         # 1. Compute Hash
         file_hash = get_file_hash(file_path)
 
         # 2. Check Cache
-        # We query for just 1 ID with this hash to see if it exists
         existing = store.collection.get(where={"file_hash": file_hash}, limit=1)
 
         if not existing['ids']:
             print(f"[RAG] Ingesting new file: {file_path}...", file=sys.stderr)
             raw_text = extract_text_from_pdf(file_path)
             chunks = chunk_text(raw_text)
-            # Tag chunks with the hash so we can find them later
             store.add_documents(chunks, metadatas=[{"file_hash": file_hash}] * len(chunks))
         else:
             print(f"[RAG] Using cached embeddings for {file_path}", file=sys.stderr)
@@ -83,6 +81,8 @@ def setup_rag_context(file_path, query_text):
         sys.exit(1)
     except Exception as e:
         print(f"\nRAG Error: {e}", file=sys.stderr)
+        if debug_enabled:
+            traceback.print_exc()
         sys.exit(1)
 
     return ""
@@ -97,11 +97,12 @@ def entry_point():
     parser.add_argument("--rag", type=str, help="Path to PDF file for context")
     parser.add_argument("--json", action="store_true", help="Force JSON output")
     parser.add_argument("--no-stream", action="store_true", help="Disable Streaming")
+    parser.add_argument("--debug", action="store_true", help="Enable debug mode to show full tracebacks.")
     args = parser.parse_args()
 
     try:
         final_user_input = get_user_input(args)
-        rag_context = setup_rag_context(args.rag, final_user_input)
+        rag_context = setup_rag_context(args.rag, final_user_input, args.debug)
         history = load_memory(session=args.session)
 
         messages = history + [{"role": "user", "content": final_user_input}]
@@ -128,18 +129,28 @@ def entry_point():
         sys.exit(0)
     except AuthenticationError:
         print(f"\nError: Authentication Failed for model '{args.model}'.", file=sys.stderr)
+        if args.debug:
+            traceback.print_exc()
         sys.exit(1)
     except RateLimitError:
         print(f"\nError: Rate Limit Exceeded.", file=sys.stderr)
+        if args.debug:
+            traceback.print_exc()
         sys.exit(1)
     except NotFoundError:
         print(f"\nError: Model '{args.model}' not found.", file=sys.stderr)
+        if args.debug:
+            traceback.print_exc()
         sys.exit(1)
     except APIConnectionError:
         print(f"\nError: Connection Failed.", file=sys.stderr)
+        if args.debug:
+            traceback.print_exc()
         sys.exit(1)
     except Exception as e:
         print(f"\nError: {e}", file=sys.stderr)
+        if args.debug:
+            traceback.print_exc()
         sys.exit(1)
 
 if __name__ == "__main__":
