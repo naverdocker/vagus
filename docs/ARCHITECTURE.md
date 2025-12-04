@@ -1,55 +1,53 @@
 # Vagus Architecture
 
-This document outlines the high-level architecture and data flow of Vagus.
+This document outlines the high-level architecture and data flow of Vagus (v0.2.2).
 
 ## Core Flow
 
-Vagus operates as a pipeline that connects user input (from arguments or stdin) to a Large Language Model (LLM), manages context via a persistent memory file, and streams the response back to the terminal.
+Vagus operates as a pipeline that connects user input to a Large Language Model (LLM), manages context via persistent memory, and optionally retrieves information from local documents (RAG).
 
 ### High-Level Diagram
 
 ```mermaid
 graph TD
-    User((User)) -->|Input / Args| Main[Main Controller<br/>(main.py)]
+    User((User)) -->|Input / Args| Main[Main Controller]
     
-    subgraph "Vagus Application"
-        Main -->|1. Load History| Memory[Memory System<br/>(storage.py)]
-        Memory -->|Context (Last N turns)| Main
+    subgraph "Core Pipeline"
+        Main -->|1. Setup RAG| RAG[RAG System]
+        RAG -->|Retrieve Context| VectorDB[(Vector Store)]
         
-        Main -->|2. Send Prompt + Context| LLM[LLM Core<br/>(llm.py)]
+        Main -->|2. Load History| Memory[Memory System]
+        Memory -->|History| Main
         
-        LLM -->|3. API Request| LiteLLM(LiteLLM Library)
-        LiteLLM -->|Stream| ExternalAPI((External LLM API))
-        ExternalAPI -->|Response Stream| LiteLLM
-        
-        LiteLLM -->|4. Stream Output| LLM
-        LLM -->|5. Calculate Cost| Cost[Cost Utils<br/>(cost.py)]
-        
-        LLM -->|6. Final Text| Main
-        Main -->|7. Save Interaction| Memory
+        Main -->|3. Construct Prompt| LLM[LLM Core]
+        LLM -->|Stream| User
     end
     
-    Memory -.->|Read/Write| Disk[(~/.vagus/memory.jsonl<br/>OR<br/>~/.vagus/sessions/*)]
-    Main -->|Output| User
-    Cost -.->|Stderr Info| User
+    subgraph "Persistence"
+        Memory -.->|JSONL| Disk[(Local Storage)]
+        VectorDB -.->|Embeddings| Cache[(ChromaDB)]
+    end
 ```
 
 ## Key Components
 
 1.  **Main Controller (`src/vagus/main.py`):**
-    *   Entry point.
-    *   Parses CLI arguments (including `--session`).
-    *   Orchestrates the flow: Load Memory -> Query LLM -> Save Memory.
+    *   **Orchestrator:** Parses CLI args (`--session`, `--rag`, `--debug`), combines stdin/args, and initializes the pipeline.
+    *   **Error Handling:** Wraps execution to handle interruptions and API errors gracefully (or prints tracebacks in `--debug` mode).
 
 2.  **Memory System (`src/vagus/memory/storage.py`):**
-    *   Manages conversation history.
-    *   **Default:** Uses `~/.vagus/memory.jsonl`.
-    *   **Sessions:** Uses `~/.vagus/sessions/<name>.jsonl` if `--session` is provided.
-    *   Retrieves the last `N` interactions (sliding window) to maintain context.
+    *   **Persistence:** Stores conversation history in JSONL format at `~/.vagus/sessions/`.
+    *   **Context Window:** Loads the last `N` interactions to maintain conversation continuity.
 
-3.  **LLM Core (`src/vagus/core/llm.py`):**
-    *   Wraps `litellm` to support multiple providers (Gemini, OpenAI, Claude).
-    *   Handles streaming responses to `stdout`.
+3.  **RAG System (Retrieval-Augmented Generation):**
+    *   **Ingestion (`utils/pdf_ingestor.py`):** Extracts text from PDFs and chunks it.
+    *   **Storage (`memory/vector_store.py`):** Embeds chunks using `sentence-transformers` and stores them in ChromaDB (`~/.vagus/vector_db`).
+    *   **Retrieval:** Finds the top 3 most relevant chunks to inject into the LLM prompt.
 
-4.  **Cost Utilities (`src/vagus/utils/cost.py`):**
-    *   Calculates and prints session cost to `stderr`.
+4.  **LLM Core (`src/vagus/core/llm.py`):**
+    *   **Inference:** Wraps `litellm` to support unified API calls to various providers (OpenAI, Gemini, Claude).
+    *   **Streaming:** Manages real-time token streaming to `stdout`.
+
+5.  **Testing Infrastructure (`tests/`):**
+    *   **Unit Tests:** `pytest` suite covering core logic (LLM mocking, Storage I/O).
+    *   **CI:** GitHub Actions pipeline ensuring build stability.

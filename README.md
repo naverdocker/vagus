@@ -21,9 +21,21 @@ Vagus is a CLI-based AI utility that connects your terminal workflows directly t
 - **Persistent Memory:** Local JSONL-based persistence in `~/.vagus/` (or `~/.vagus/sessions/` for named sessions).
 
 - **Context Injection:** Automatically recalls the last 5 turns of conversation.
+- **Debug Mode:** Optional flag (`--debug`) to expose full stack traces for easier troubleshooting.
+- **Type Hinting:** Enhanced code clarity and maintainability with static type checking.
 
 
 ## Installation
+
+### For Users (Direct Install)
+Install Vagus directly from GitHub without cloning:
+   ```bash
+   # Base install (Fast, lightweight)
+   pip install git+https://github.com/naverdocker/vagus.git
+
+   # Full install (Enables RAG support)
+   pip install "vagus[rag] @ git+https://github.com/naverdocker/vagus.git"
+   ```
 
 ### For Developers (Source)
 Clone the repository:
@@ -32,24 +44,21 @@ Clone the repository:
    cd vagus
    ```
 
-Install in Editable Mode (Base):
+**Option A: Flexible Environment**
+Install the latest compatible versions defined in `setup.py`:
    ```bash
+   # Basic Dev Setup
+   pip install -e .[dev]
+
+   # Full Dev Setup (with RAG support)
+   pip install -e .[rag,dev]
+   ```
+
+**Option B: Reproducible Environment (Recommended for Testing/CI)**
+Install the exact pinned versions used in production/CI:
+   ```bash
+   pip install -r requirements.txt
    pip install -e .
-   ```
-
-Install with RAG Support:
-   ```bash
-   pip install -e .[rag]
-   ```
-
-### For Users (Direct Install)
-Install Vagus directly from GitHub without cloning:
-   ```bash
-   # Base install (Fast, lightweight)
-   pip install git+https://github.com/naverdocker/vagus.git
-
-   # Full install (Enables RAG / PDF support)
-   pip install "vagus[rag] @ git+https://github.com/naverdocker/vagus.git"
    ```
 
 ## Configuration

@@ -9,13 +9,15 @@ This document tracks planned engineering efforts and conceptual ideas for the fu
 - [x] **v0.1.3:** Hardening & Robustness (Structured Memory Storage, Session Management, improved error handling).
 - [x] **v0.2.0:** RAG Implementation (PDF Chat, Vector Store, Optional Dependencies).
 - [x] **v0.2.1:** Maintenance & Optimization (Smart RAG Caching, ID Safety, Dependency Pinning).
+- [x] **v0.2.2:** Stability & Tests (Pytest Suite, Debug Mode, CI Pipeline, Strict Dependency Locking).
 
 ## Planned Engineering (Short-Term)
 - [ ] **Model Shortcuts:** Configurable aliases (e.g., `-m1` -> `gpt-4o`, `-m2` -> `groq/...`) for quick switching.
 - [ ] **Docker Support:** Containerize Vagus for isolated testing and "run anywhere" usage.
 - [ ] **Remote Embeddings:** Support OpenAI/Gemini embedding APIs to reduce local dependency weight.
-- [ ] **CI/CD Pipeline:** Add GitHub Actions for automated linting, testing, and release builds.
-- [ ] **Unit Test Suite:** Replace manual tests with a robust `pytest` suite.
+- [ ] **Async Architecture:** Refactor to `asyncio` for improved performance and concurrency (~v0.3.0).
+- [ ] **Smart Context Window:** Token-aware history management to prevent context overflow (~v0.4.0).
+- [ ] **RAG Relevance Filtering:** Similarity score thresholds to reduce hallucinations (~v0.4.0).
 - [ ] **Vector Search over History:** Extend RAG to index long-term conversation history (moving beyond the 5-turn limit).
 
 ## Concepts & Exploration (Long-Term Ideas)
