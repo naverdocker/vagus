@@ -22,6 +22,10 @@ setup(
                 "chromadb~=1.3",
                 "pypdf~=6.0",
                 "sentence-transformers~=5.1"
+            ],
+            "dev": [
+                "pytest~=8.0",
+                "pytest-mock~=3.0"
             ]
         },
     classifiers=[

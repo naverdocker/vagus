@@ -15,4 +15,4 @@ vagus --session cooking "My favorite food is Pizza." # Session Management: Step 
 vagus --session coding "What is my favorite language?" # Session Management: Step 3 (Verify Isolation - Expect: Python)
 vagus --session cooking "What is my favorite language?" # Session Management: Step 3 (Verify Isolation - Expect: I don't know)
 vagus --rag data/secret_project.pdf "What is the secret code of Project Omega?" # RAG: Query secret project PDF
-vagus --rag data/secret_project.pdf "Who is the lead engineer for SunToast?" # RAG: Query another detail
+vagus --rag data/secret_groject.pdf "Who is the lead engineer for SunToast?" # RAG: Query another detail
